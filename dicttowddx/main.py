@@ -1,6 +1,7 @@
 import base64
-import re
 from collections.abc import Iterable
+from typing import Any
+
 from yattag import Doc, indent
 
 
@@ -12,54 +13,50 @@ class DictToWDDX:
         data: dict,
         force_type: bool = False,
         format_output: bool = False,
-        indent: int = 4,
-    ):
+        display_indent: int = 4,
+    ) -> None:
         if not data or not isinstance(data, dict):
             raise TypeError(f"Data must be of type dict, type {type(data)} given")
         self.data = data
         self.format_output = format_output
-        self.indent = indent
-        self.force_output = force_type
+        self.display_indent = display_indent
+        self.force_type = force_type
         self.doc, self.tag, self.text = Doc().tagtext()
 
-    def to_type(self, value):
+    @staticmethod
+    def to_type(value) -> str:
         """This function is used to convert a value to a type"""
         non_str = {
             "bool": "boolean",
             "int": "number",
             "float": "number",
             "bytes": "binary",
+            "datetime": "dateTime",
         }
-        original_type = type(value).__name__
-        if original_type != "str":
-            return non_str.get(original_type, "string")
+        main_type = type(value).__name__
+        return non_str.get(main_type) if main_type != "str" else "string"
 
-        _type = "string"
-        type_dict = {
-            # "binary": re.compile(r"^[A-Za-z0-9+/=]+$"),
-            # "boolean": re.compile(r"^(?:True|False)$"),
-            # "int": re.compile(r"^\d+$"),
-            "dateTime": re.compile(
-                r"^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}:\d{2}(\.\d+)?(?:Z|[+-]\d{2}:\d{2})?| \d{2}:\d{2}:\d{2}(?:Z|[+-]\d{2}:\d{2})?)$"
-            ),
-        }
-        for k, v in type_dict.items():
-            if v.match(str(value)):
-                _type = k
-                break
-        return _type
-
-    def wddx_type(self, value):
+    def wddx_type(self, value) -> str:
         """This function is used to force the type of the value"""
-        return self.to_type(value) if self.force_output else "string"
+        return self.to_type(value) if self.force_type else "string"
 
-    def is_binary(self, value):
+    def is_binary(self, value) -> Any:
         """This function is used to check if the value is binary"""
-        if self.wddx_type(value) == "binary":
+        if self.force_type and self.wddx_type(value) == "binary":
             return self.text(base64.b64encode(value).decode())
+        if type(value).__name__ == "bytes":
+            return self.text(value.decode("utf-8"))
         return self.text(str(value))
 
-    def to_wddx(self):
+    def none_or_data(self, value):
+        """This function is used to check if the value is None or binary"""
+        if value is None:
+            self.doc.asis("<null/>")
+        else:
+            with self.tag(self.wddx_type(value)):
+                self.is_binary(value)
+
+    def to_wddx(self) -> str:
         """This function is used to convert a simple python dict to wddx data format"""
 
         self.doc.asis("<wddxPacket version='1.0'><header/>")
@@ -74,22 +71,14 @@ class DictToWDDX:
                         with self.tag("var", name=key):
                             with self.tag("array", length=len(self.data.get(key))):
                                 for elem in self.data.get(key):
-                                    if elem is None:
-                                        self.doc.asis("<null/>")
-                                    else:
-                                        with self.tag(self.wddx_type(elem)):
-                                            self.is_binary(elem)
+                                    self.none_or_data(elem)
                     else:
                         with self.tag("var", name=key):
-                            if self.data.get(key) is None:
-                                self.doc.asis("<null/>")
-                            else:
-                                with self.tag(self.wddx_type(self.data.get(key))):
-                                    self.is_binary(self.data.get(key))
+                            self.none_or_data(self.data.get(key))
         self.doc.asis("</wddxPacket>")
         val = self.doc.getvalue()
         return (
             val
             if not self.format_output
-            else indent(val, indentation=" " * self.indent, newline="\n")
+            else indent(val, indentation=" " * self.display_indent, newline="\n")
         )
