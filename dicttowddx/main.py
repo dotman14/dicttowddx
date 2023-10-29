@@ -66,7 +66,7 @@ class DictToWDDX:
                     if key is None:
                         raise KeyError("Key cannot be None", "{}".format(key))
                     if isinstance(self.data.get(key), Iterable) and (
-                        not isinstance(self.data.get(key), str | bytes)
+                        not isinstance(self.data.get(key), (str, bytes))
                     ):
                         with self.tag("var", name=key):
                             with self.tag("array", length=len(self.data.get(key))):
