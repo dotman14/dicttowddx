@@ -49,6 +49,13 @@ class TestDictToWDDX(unittest.TestCase):
         with self.assertRaises(TypeError):
             DictToWDDX(1)
 
+    def test_invalid_format_indent(self):
+        with self.assertRaises(ValueError):
+            DictToWDDX(self.a, display_indent="1")
+
+        with self.assertRaises(ValueError):
+            DictToWDDX(self.a, display_indent=-2)
+
     def test_valid_data_nested(self):
         wddx = """<wddxPacket version='1.0'><header/><data><struct><var name="a"><array length="7"><null/><boolean>True</boolean><number>1.8</number><number>1</number><string>1</string><dateTime>2021-09-15 14:30:00+00:00</dateTime><binary>YXM=</binary></array></var></struct></data></wddxPacket>"""  # noqa
         dtw = DictToWDDX(self.a, force_type=True, format_output=False)

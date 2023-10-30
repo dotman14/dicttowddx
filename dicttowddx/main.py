@@ -17,6 +17,10 @@ class DictToWDDX:
     ) -> None:
         if not data or not isinstance(data, dict):
             raise TypeError(f"Data must be of type dict, type {type(data)} given")
+        if not isinstance(display_indent, int) or display_indent < 0:
+            raise ValueError(
+                f"Format indent value must be an integer greater than 0, {display_indent} given"
+            )
         self.data = data
         self.format_output = format_output
         self.display_indent = display_indent
