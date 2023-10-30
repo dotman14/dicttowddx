@@ -1,6 +1,6 @@
 # dicttowddx
 
-This is a python script that converts a python dictionary to a wddx string. This is useful when you want to exchange with endpoints that support WDDX format.
+This is a Python lib that converts a Python dictionary to a WDDX string. This is useful when you want to exchange with endpoints that support WDDX format.
 
 ## Installation
 
@@ -9,7 +9,7 @@ pip install dicttowddx
 ```
 
 ## Supported data types
-The following datatypes are supported:
+The following data types are supported:
 
 | Python   | WDDX Type               |
 |----------|-------------------------|
