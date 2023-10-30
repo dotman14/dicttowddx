@@ -1,1 +1,1 @@
-from .main import DictToWDDX
+from .main import DictToWDDX # noqa
