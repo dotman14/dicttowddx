@@ -27,10 +27,25 @@ The following datatypes are supported:
 import datetime
 from dicttowddx import DictToWDDX
 
-c = {"a": b"ab", "b": None, "c": 1,
-     "d": [None, True, 1.8, 1, "1", datetime.datetime(2021, 9, 15, 14, 30, 0, tzinfo=datetime.timezone.utc), b"as", ],
-     "e": datetime.datetime(2021, 9, 15, 14, 30, 0, tzinfo=datetime.timezone.utc), "f": None, "g": 1.1, "h": True,
-     "i": "1", }
+c = {
+   "a": b"ab",
+   "b": None,
+   "c": 1,
+   "d": [
+       None,
+       True,
+       1.8,
+       1,
+       "1",
+       datetime.datetime(2021, 9, 15, 14, 30, 0, tzinfo=datetime.timezone.utc),
+       b"as",
+   ],
+   "e": datetime.datetime(2021, 9, 15, 14, 30, 0, tzinfo=datetime.timezone.utc),
+   "f": None,
+   "g": 1.1,
+   "h": True,
+   "i": "1",
+}
 
 wddx = DictToWDDX(c).to_wddx()
 ```
